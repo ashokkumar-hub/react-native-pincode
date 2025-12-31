@@ -21,9 +21,13 @@ exports.deletePinCode = async (serviceName) => {
 exports.resetInternalStates = async (asyncStorageKeys) => {
     return await async_storage_1.default.multiRemove(asyncStorageKeys);
 };
+// Updated for react-native-keychain 10.0.0 API
 exports.noBiometricsConfig = react_native_1.Platform.select({
     android: {
         accessControl: Keychain.ACCESS_CONTROL.APPLICATION_PASSWORD,
+        storage: Keychain.STORAGE_TYPE.AES,
     },
-    ios: {}
+    ios: {
+        accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
+    }
 });

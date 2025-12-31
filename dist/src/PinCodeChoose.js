@@ -16,14 +16,39 @@ class PinCodeChoose extends React.PureComponent {
         };
         this.endProcessConfirm = async (pinCode) => {
             if (pinCode === this.state.pinCode) {
-                if (this.props.storePin) {
-                    this.props.storePin(pinCode);
+                try {
+                    if (this.props.storePin) {
+                        this.props.storePin(pinCode);
+                    }
+                    else {
+                        console.log('--- PINCODE LIBRARY: Saving PIN to Keychain...');
+                        // Updated for react-native-keychain 10.0.0 API
+                        const options = {
+                            ...utils_1.noBiometricsConfig,
+                            service: this.props.pinCodeKeychainName,
+                        };
+                        await Keychain.setInternetCredentials(
+                            this.props.pinCodeKeychainName,
+                            this.props.pinCodeKeychainName,
+                            pinCode,
+                            options
+                        );
+                        console.log('--- PINCODE LIBRARY: PIN saved successfully to Keychain');
+                    }
+                    // CRITICAL FIX: Always call finishProcess, even if Keychain save has issues
+                    if (!!this.props.finishProcess) {
+                        console.log('--- PINCODE LIBRARY: Calling finishProcess callback');
+                        this.props.finishProcess(pinCode);
+                    }
+                } catch (error) {
+                    // RN 0.80+ FIX: Don't let Keychain errors prevent finishProcess
+                    console.error('--- PINCODE LIBRARY ERROR: Keychain save failed, but continuing:', error);
+                    // Still call finishProcess so the app can handle the PIN
+                    if (!!this.props.finishProcess) {
+                        console.log('--- PINCODE LIBRARY: Calling finishProcess despite Keychain error');
+                        this.props.finishProcess(pinCode);
+                    }
                 }
-                else {
-                    await Keychain.setInternetCredentials(this.props.pinCodeKeychainName, this.props.pinCodeKeychainName, pinCode, utils_1.noBiometricsConfig);
-                }
-                if (!!this.props.finishProcess)
-                    this.props.finishProcess(pinCode);
             }
             else {
                 this.setState({ status: PinCode_1.PinStatus.choose });
