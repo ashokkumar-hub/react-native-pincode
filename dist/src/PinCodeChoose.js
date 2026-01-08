@@ -22,16 +22,11 @@ class PinCodeChoose extends React.PureComponent {
                     }
                     else {
                         console.log('--- PINCODE LIBRARY: Saving PIN to Keychain...');
-                        // Updated for react-native-keychain 10.0.0 API
-                        const options = {
-                            ...utils_1.noBiometricsConfig,
-                            service: this.props.pinCodeKeychainName,
-                        };
                         await Keychain.setInternetCredentials(
                             this.props.pinCodeKeychainName,
                             this.props.pinCodeKeychainName,
                             pinCode,
-                            options
+                            utils_1.noBiometricsConfig
                         );
                         console.log('--- PINCODE LIBRARY: PIN saved successfully to Keychain');
                     }
