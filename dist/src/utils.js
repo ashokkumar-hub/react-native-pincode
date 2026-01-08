@@ -16,7 +16,17 @@ exports.hasPinCode = async (serviceName) => {
     });
 };
 exports.deletePinCode = async (serviceName) => {
-    return await Keychain.resetInternetCredentials(serviceName);
+    // react-native-keychain 10.0.0 API: single options object with server property
+    const options = {
+        server: serviceName,
+        ...exports.noBiometricsConfig
+    };
+    try {
+        const result = await Keychain.resetInternetCredentials(options);
+        return result;
+    } catch (error) {
+        throw error;
+    }
 };
 exports.resetInternalStates = async (asyncStorageKeys) => {
     return await async_storage_1.default.multiRemove(asyncStorageKeys);
